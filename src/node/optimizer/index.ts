@@ -2,12 +2,14 @@ import path from "path";
 import { build } from "esbuild";
 import { green } from "picocolors";
 import { scanPlugin } from "./scanPlugin";
+import { preBundlePlugin } from "./preBundlePlugin";
+import { PRE_BUNDLE_DIR } from "../constants";
 
 // 依赖预构建
 export async function optimize(root: string) {
   // 1. 确定入口
   const entry = path.resolve(root, "src/main.tsx");
-  // 2. 从入口处扫描依赖
+  // 2. 从入口处扫描依赖 依赖收集
   const deps = new Set<string>();
   await build({
     entryPoints: [entry],
@@ -21,6 +23,14 @@ export async function optimize(root: string) {
       .map((item) => `  ${item}`)
       .join("\n")}`
   );
-
   // 3. 预构建依赖
+  await build({
+    entryPoints: [...deps],
+    write: true,
+    bundle: true,
+    format: "esm",
+    splitting: true,
+    outdir: path.resolve(root, PRE_BUNDLE_DIR),
+    plugins: [preBundlePlugin(deps)],
+  });
 }
