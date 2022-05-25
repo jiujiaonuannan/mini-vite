@@ -6,6 +6,7 @@ import { blue, green } from "picocolors";
 import { optimize } from "../optimizer/index";
 import { resolvePlugins } from "../plugins";
 import { createPluginContainer, PluginContainer } from "../pluginContainer";
+import { indexHtmlMiddware } from "./middlewares/indexHtml";
 
 export interface ServerContext {
   root: string;
@@ -18,24 +19,27 @@ export async function startDevServer() {
   const app = connect();
   const root = process.cwd();
   const startTime = Date.now();
+
+  const plugins = resolvePlugins();
+  const pluginContainer = createPluginContainer(plugins);
+
+  const serverContext: ServerContext = {
+    root: process.cwd(),
+    app,
+    pluginContainer,
+    plugins,
+  };
+
+  for (const plugin of plugins) {
+    if (plugin.configureServer) {
+      await plugin.configureServer(serverContext);
+    }
+  }
+
+  app.use(indexHtmlMiddware(serverContext));
+
   app.listen(3000, async () => {
     await optimize(root);
-
-    const plugins = resolvePlugins();
-    const pluginContainer = createPluginContainer(plugins);
-
-    const serverContext: ServerContext = {
-      root: process.cwd(),
-      app,
-      pluginContainer,
-      plugins,
-    };
-
-    for (const plugin of plugins) {
-      if (plugin.configureServer) {
-        await plugin.configureServer(serverContext);
-      }
-    }
 
     console.log(
       green("🚀 No-Bundle 服务已经成功启动!"),
