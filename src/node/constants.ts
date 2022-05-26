@@ -30,3 +30,4 @@ export const BARE_IMPORT_RE = /^[\w@][^:]/;
 export const JS_TYPES_RE = /\.(?:j|t)sx?$|\.mjs$/;
 export const QEURY_RE = /\?.*$/s;
 export const HASH_RE = /#.*$/s;
+export const DEFAULT_EXTERSIONS = [".tsx", ".ts", ".jsx", "js"];
