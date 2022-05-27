@@ -27,6 +27,7 @@ export const createPluginContainer = (plugins: Plugin[]): PluginContainer => {
   const pluginContainer: PluginContainer = {
     async resolveId(id: string, importer?: string) {
       const ctx = new Context() as any;
+      // console.log('')
       for (const plugin of plugins) {
         if (plugin.resolveId) {
           const newId = await plugin.resolveId.call(ctx as any, id, importer);
