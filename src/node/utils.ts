@@ -17,3 +17,11 @@ export const cleanUrl = (url: string): string =>
 
 export const isCSSRequest = (id: string): boolean =>
   cleanUrl(id).endsWith(".css");
+
+export function isImportRequest(url: string): boolean {
+  return url.endsWith("?import");
+}
+
+export function removeImportQuery(url: string): string {
+  return url.replace(/\?import$/, "");
+}

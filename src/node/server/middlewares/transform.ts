@@ -3,6 +3,7 @@ import { isJSRequest, cleanUrl } from "../../utils";
 import { ServerContext } from "../index";
 import createDebug from "debug";
 import { isCSSRequest } from "../../utils";
+import { isImportRequest } from "../../utils";
 
 const debug = createDebug("dev");
 
@@ -40,7 +41,7 @@ export function transformMiddleware(
     const url = req.url;
     debug("transformMiddleware: %s", url);
     // transform JS request
-    if (isJSRequest(url) || isCSSRequest(url)) {
+    if (isJSRequest(url) || isCSSRequest(url) || isImportRequest(url)) {
       // 核心编译函数
       let result = await transformRequest(url, serverContext);
       if (!result) {
