@@ -52,6 +52,7 @@ export function resolvePlugin(): Plugin {
               resolvedId = resolve.sync(withExtension, {
                 basedir: path.dirname(importer),
               });
+              console.log("id..", resolvedId);
               if (await pathExists(resolvedId)) {
                 return { id: resolvedId };
               }
