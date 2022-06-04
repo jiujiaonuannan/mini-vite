@@ -60,13 +60,13 @@ export class ModuleGraph {
           : curImports;
       if (dep) {
         mod.importedModules.add(dep);
-        dep.importers.add(mod);
+        dep.importers?.add(mod);
       }
     }
     // 清除已经不再被引用的依赖
     for (const prevImport of prevImports) {
       if (!importedModules.has(prevImport.url)) {
-        prevImport.importers.delete(mod);
+        prevImport.importers?.delete(mod);
       }
     }
   }
