@@ -10,6 +10,9 @@ import { indexHtmlMiddware } from "./middlewares/indexHtml";
 import { transformMiddleware } from "./middlewares/transform";
 import { staticMiddleware } from "./middlewares/static";
 import { ModuleGraph } from "../ModuleGraph";
+import chokidar, { FSWatcher } from "chokidar";
+import { createWebSocketServer } from "../ws";
+import { bindingHMREvents } from "../hmr";
 
 export interface ServerContext {
   root: string;
@@ -17,6 +20,8 @@ export interface ServerContext {
   app: connect.Server;
   plugins: Plugin[];
   moduleGraph: ModuleGraph;
+  ws: { send: (data: any) => void; close: () => void };
+  watcher: FSWatcher;
 }
 
 export async function startDevServer() {
@@ -30,7 +35,13 @@ export async function startDevServer() {
     return pluginContainer.resolveId(url);
   });
   const pluginContainer = createPluginContainer(plugins);
-  console.log("moduleGraph...", moduleGraph);
+  const watcher = chokidar.watch(root, {
+    ignored: ["**/node_modules/**", "**/.git/**"],
+    ignoreInitial: true,
+  });
+  // console.log("moduleGraph...", moduleGraph);
+
+  const ws = createWebSocketServer(app);
 
   const serverContext: ServerContext = {
     root: process.cwd(),
@@ -38,7 +49,11 @@ export async function startDevServer() {
     pluginContainer,
     plugins,
     moduleGraph,
+    ws,
+    watcher,
   };
+
+  bindingHMREvents(serverContext);
 
   for (const plugin of plugins) {
     if (plugin.configureServer) {
